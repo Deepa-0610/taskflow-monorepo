@@ -1,13 +1,12 @@
 import { useState, useEffect } from 'react';
 import { useAuth } from '@/hooks/useAuth';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, Link } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { toast } from 'sonner';
 import { z } from 'zod';
-import Navigation from '@/components/Navigation';
+import { ArrowLeft, Mail, Lock, User } from 'lucide-react';
 
 const authSchema = z.object({
   email: z.string().email('Invalid email address').max(255),
@@ -72,73 +71,112 @@ const Auth = () => {
   };
 
   return (
-    <div className="min-h-screen bg-background">
-      <Navigation />
-      <div className="flex min-h-[calc(100vh-4rem)] items-center justify-center p-4">
-        <Card className="w-full max-w-md">
-          <CardHeader>
-            <CardTitle>{isLogin ? 'Login' : 'Sign Up'}</CardTitle>
-            <CardDescription>
-              {isLogin 
-                ? 'Welcome back! Please login to your account.' 
-                : 'Create an account to start managing your tasks.'}
+    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-background via-secondary/20 to-background p-4 relative overflow-hidden">
+      <div className="absolute inset-0 bg-[radial-gradient(circle_at_20%_30%,hsl(var(--primary)/0.08),transparent_50%)]" />
+      <div className="absolute inset-0 bg-[radial-gradient(circle_at_80%_70%,hsl(var(--accent)/0.08),transparent_50%)]" />
+      
+      <div className="w-full max-w-md relative z-10">
+        <Button asChild variant="ghost" className="mb-6 group">
+          <Link to="/">
+            <ArrowLeft className="h-4 w-4 transition-transform group-hover:-translate-x-1" />
+            Back to Home
+          </Link>
+        </Button>
+
+        <Card className="auth-card animate-scale-in shadow-[0_8px_30px_rgb(0,0,0,0.12)] border-2">
+          <CardHeader className="space-y-1 pb-6">
+            <div className="flex items-center justify-center mb-4">
+              <div className="h-12 w-12 rounded-xl bg-gradient-to-br from-primary to-primary-glow flex items-center justify-center">
+                <User className="h-6 w-6 text-primary-foreground" />
+              </div>
+            </div>
+            <CardTitle className="text-3xl font-bold text-center">
+              {isLogin ? 'Welcome Back' : 'Get Started'}
+            </CardTitle>
+            <CardDescription className="text-center text-base">
+              {isLogin
+                ? 'Sign in to your account to continue'
+                : 'Create your account to start organizing'}
             </CardDescription>
           </CardHeader>
           <CardContent>
-            <form onSubmit={handleSubmit} className="space-y-4">
+            <form onSubmit={handleSubmit} className="space-y-5">
               <div className="space-y-2">
-                <Label htmlFor="email">Email</Label>
-                <Input
-                  id="email"
-                  type="email"
-                  placeholder="your@email.com"
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
-                  required
-                  disabled={loading}
-                />
+                <div className="relative">
+                  <Mail className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground" />
+                  <Input
+                    type="email"
+                    placeholder="Email address"
+                    value={email}
+                    onChange={(e) => setEmail(e.target.value)}
+                    disabled={loading}
+                    required
+                    className="pl-10 h-12 text-base"
+                  />
+                </div>
               </div>
               <div className="space-y-2">
-                <Label htmlFor="password">Password</Label>
-                <Input
-                  id="password"
-                  type="password"
-                  placeholder="••••••••"
-                  value={password}
-                  onChange={(e) => setPassword(e.target.value)}
-                  required
-                  disabled={loading}
-                />
+                <div className="relative">
+                  <Lock className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground" />
+                  <Input
+                    type="password"
+                    placeholder="Password"
+                    value={password}
+                    onChange={(e) => setPassword(e.target.value)}
+                    disabled={loading}
+                    required
+                    className="pl-10 h-12 text-base"
+                  />
+                </div>
               </div>
               {!isLogin && (
                 <div className="space-y-2">
-                  <Label htmlFor="confirmPassword">Confirm Password</Label>
-                  <Input
-                    id="confirmPassword"
-                    type="password"
-                    placeholder="••••••••"
-                    value={confirmPassword}
-                    onChange={(e) => setConfirmPassword(e.target.value)}
-                    required
-                    disabled={loading}
-                  />
+                  <div className="relative">
+                    <Lock className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground" />
+                    <Input
+                      type="password"
+                      placeholder="Confirm password"
+                      value={confirmPassword}
+                      onChange={(e) => setConfirmPassword(e.target.value)}
+                      disabled={loading}
+                      required
+                      className="pl-10 h-12 text-base"
+                    />
+                  </div>
                 </div>
               )}
-              <Button type="submit" className="w-full" disabled={loading}>
-                {loading ? 'Please wait...' : isLogin ? 'Login' : 'Sign Up'}
+              <Button 
+                type="submit" 
+                className="w-full h-12 text-base" 
+                disabled={loading}
+                variant="gradient"
+              >
+                {loading ? 'Loading...' : isLogin ? 'Sign In' : 'Create Account'}
+              </Button>
+              <div className="relative">
+                <div className="absolute inset-0 flex items-center">
+                  <span className="w-full border-t" />
+                </div>
+                <div className="relative flex justify-center text-xs uppercase">
+                  <span className="bg-card px-2 text-muted-foreground">
+                    {isLogin ? 'New to TaskFlow?' : 'Already have an account?'}
+                  </span>
+                </div>
+              </div>
+              <Button
+                type="button"
+                variant="outline"
+                className="w-full h-12 text-base"
+                onClick={() => {
+                  setIsLogin(!isLogin);
+                  setEmail('');
+                  setPassword('');
+                  setConfirmPassword('');
+                }}
+              >
+                {isLogin ? 'Create an account' : 'Sign in instead'}
               </Button>
             </form>
-            <div className="mt-4 text-center text-sm">
-              {isLogin ? "Don't have an account? " : 'Already have an account? '}
-              <button
-                type="button"
-                onClick={() => setIsLogin(!isLogin)}
-                className="text-primary hover:underline"
-                disabled={loading}
-              >
-                {isLogin ? 'Sign Up' : 'Login'}
-              </button>
-            </div>
           </CardContent>
         </Card>
       </div>

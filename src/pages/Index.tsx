@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { useAuth } from '@/hooks/useAuth';
 import Navigation from '@/components/Navigation';
 import { Button } from '@/components/ui/button';
-import { CheckSquare, ListTodo, Zap, Shield } from 'lucide-react';
+import { CheckSquare, ListTodo, Zap, Shield, Clock, CheckCircle2 } from 'lucide-react';
 
 const Index = () => {
   const { user } = useAuth();
@@ -16,76 +16,103 @@ const Index = () => {
   }, [user, navigate]);
 
   return (
-    <div className="min-h-screen bg-background">
+    <div className="min-h-screen">
       <Navigation />
       
       {/* Hero Section */}
-      <section className="container mx-auto px-4 py-20 text-center">
-        <div className="max-w-3xl mx-auto space-y-6">
-          <div className="inline-flex items-center justify-center p-2 bg-primary/10 rounded-full mb-4">
-            <CheckSquare className="h-12 w-12 text-primary" />
-          </div>
-          <h1 className="text-5xl md:text-6xl font-bold tracking-tight">
-            Organize Your Tasks with <span className="text-primary">TaskFlow</span>
-          </h1>
-          <p className="text-xl text-muted-foreground max-w-2xl mx-auto">
-            A comprehensive task management application designed to help you organize, track, and complete your daily tasks efficiently.
-          </p>
-          <div className="flex gap-4 justify-center pt-4">
-            <Button size="lg" onClick={() => navigate('/auth')} className="gap-2">
-              Get Started Free
-              <CheckSquare className="h-4 w-4" />
-            </Button>
+      <section className="relative overflow-hidden bg-gradient-to-br from-background via-secondary/30 to-background">
+        <div className="absolute inset-0 bg-[radial-gradient(circle_at_30%_50%,hsl(var(--primary)/0.1),transparent_50%)]" />
+        <div className="absolute inset-0 bg-[radial-gradient(circle_at_70%_50%,hsl(var(--accent)/0.1),transparent_50%)]" />
+        
+        <div className="container relative mx-auto px-4 py-24 md:py-32">
+          <div className="mx-auto max-w-4xl text-center">
+            <div className="mb-6 inline-block animate-fade-in">
+              <span className="inline-flex items-center gap-2 rounded-full bg-primary/10 px-4 py-2 text-sm font-semibold text-primary">
+                <Zap className="h-4 w-4" />
+                Boost Your Productivity
+              </span>
+            </div>
+            
+            <h1 className="mb-6 animate-slide-up text-5xl font-bold tracking-tight md:text-6xl lg:text-7xl">
+              Organize Your Tasks,{' '}
+              <span className="gradient-text">Achieve Your Goals</span>
+            </h1>
+            
+            <p className="mb-8 animate-slide-up text-lg text-muted-foreground md:text-xl" style={{ animationDelay: '0.1s' }}>
+              TaskFlow helps you manage your daily tasks efficiently with a clean,
+              intuitive interface. Stay focused, get things done, and track your progress.
+            </p>
+            
+            <div className="flex flex-col items-center justify-center gap-4 sm:flex-row animate-slide-up" style={{ animationDelay: '0.2s' }}>
+              <Button size="lg" variant="gradient" className="group" onClick={() => navigate('/auth')}>
+                Get Started Free
+                <CheckCircle2 className="ml-2 h-5 w-5 transition-transform group-hover:scale-110" />
+              </Button>
+            </div>
           </div>
         </div>
       </section>
 
       {/* Features Section */}
-      <section className="container mx-auto px-4 py-20 bg-muted/50">
-        <h2 className="text-3xl font-bold text-center mb-12">Why Choose TaskFlow?</h2>
-        <div className="grid md:grid-cols-3 gap-8 max-w-5xl mx-auto">
-          <div className="bg-card p-6 rounded-lg border text-center space-y-4">
-            <div className="inline-flex items-center justify-center p-3 bg-primary/10 rounded-full">
-              <ListTodo className="h-6 w-6 text-primary" />
+      <section className="container mx-auto px-4 py-20">
+        <div className="mb-16 text-center">
+          <h2 className="mb-4 text-3xl font-bold md:text-4xl">
+            Everything You Need to Stay Organized
+          </h2>
+          <p className="text-lg text-muted-foreground">
+            Simple, powerful features to help you manage your tasks
+          </p>
+        </div>
+
+        <div className="grid gap-8 md:grid-cols-2 lg:grid-cols-3">
+          <div className="group animate-fade-in hover-lift rounded-2xl border bg-card p-8 transition-all" style={{ animationDelay: '0.1s' }}>
+            <div className="mb-4 inline-flex h-14 w-14 items-center justify-center rounded-xl bg-primary/10 text-primary transition-all group-hover:scale-110 group-hover:bg-primary group-hover:text-primary-foreground">
+              <ListTodo className="h-7 w-7" />
             </div>
-            <h3 className="text-xl font-semibold">Easy Task Management</h3>
+            <h3 className="mb-3 text-xl font-semibold">Easy Task Management</h3>
             <p className="text-muted-foreground">
-              Create, update, and organize your tasks with a simple and intuitive interface.
+              Create, organize, and complete tasks with a simple and intuitive interface
+              that keeps you focused on what matters.
             </p>
           </div>
-          
-          <div className="bg-card p-6 rounded-lg border text-center space-y-4">
-            <div className="inline-flex items-center justify-center p-3 bg-accent/10 rounded-full">
-              <Zap className="h-6 w-6 text-accent" />
+
+          <div className="group animate-fade-in hover-lift rounded-2xl border bg-card p-8 transition-all" style={{ animationDelay: '0.2s' }}>
+            <div className="mb-4 inline-flex h-14 w-14 items-center justify-center rounded-xl bg-accent/10 text-accent transition-all group-hover:scale-110 group-hover:bg-accent group-hover:text-accent-foreground">
+              <Clock className="h-7 w-7" />
             </div>
-            <h3 className="text-xl font-semibold">Real-time Updates</h3>
+            <h3 className="mb-3 text-xl font-semibold">Real-time Updates</h3>
             <p className="text-muted-foreground">
-              See your changes instantly across all devices with real-time synchronization.
+              Your tasks sync instantly across all your devices. Always stay up to date
+              with real-time synchronization.
             </p>
           </div>
-          
-          <div className="bg-card p-6 rounded-lg border text-center space-y-4">
-            <div className="inline-flex items-center justify-center p-3 bg-secondary/10 rounded-full">
-              <Shield className="h-6 w-6 text-secondary" />
+
+          <div className="group animate-fade-in hover-lift rounded-2xl border bg-card p-8 transition-all" style={{ animationDelay: '0.3s' }}>
+            <div className="mb-4 inline-flex h-14 w-14 items-center justify-center rounded-xl bg-destructive/10 text-destructive transition-all group-hover:scale-110 group-hover:bg-destructive group-hover:text-destructive-foreground">
+              <Shield className="h-7 w-7" />
             </div>
-            <h3 className="text-xl font-semibold">Secure & Private</h3>
+            <h3 className="mb-3 text-xl font-semibold">Secure & Private</h3>
             <p className="text-muted-foreground">
-              Your data is protected with enterprise-grade security and row-level access control.
+              Your data is protected with enterprise-grade security. Only you can access
+              your tasks with row-level security.
             </p>
           </div>
         </div>
       </section>
 
       {/* CTA Section */}
-      <section className="container mx-auto px-4 py-20 text-center">
-        <div className="max-w-2xl mx-auto space-y-6">
-          <h2 className="text-4xl font-bold">Ready to Get Organized?</h2>
-          <p className="text-xl text-muted-foreground">
-            Join TaskFlow today and start managing your tasks more efficiently.
+      <section className="relative overflow-hidden bg-gradient-to-br from-primary via-primary-glow to-primary py-20">
+        <div className="absolute inset-0 bg-[radial-gradient(circle_at_50%_50%,rgba(255,255,255,0.1),transparent_50%)]" />
+        <div className="container relative mx-auto px-4 text-center">
+          <h2 className="mb-6 text-3xl font-bold text-primary-foreground md:text-4xl">
+            Ready to Get Organized?
+          </h2>
+          <p className="mb-8 text-lg text-primary-foreground/90">
+            Join thousands of users who are already managing their tasks efficiently
           </p>
-          <Button size="lg" onClick={() => navigate('/auth')} className="gap-2">
-            Start Managing Tasks
-            <CheckSquare className="h-4 w-4" />
+          <Button size="lg" variant="secondary" className="group" onClick={() => navigate('/auth')}>
+            Start Using TaskFlow
+            <CheckCircle2 className="ml-2 h-5 w-5 transition-transform group-hover:scale-110" />
           </Button>
         </div>
       </section>

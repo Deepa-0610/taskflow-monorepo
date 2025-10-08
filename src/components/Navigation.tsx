@@ -1,7 +1,7 @@
 import { Link, useLocation } from 'react-router-dom';
 import { useAuth } from '@/hooks/useAuth';
 import { Button } from '@/components/ui/button';
-import { CheckSquare, User, LogOut, Menu, X } from 'lucide-react';
+import { ListTodo, User, LogOut, Menu, X } from 'lucide-react';
 import { useState } from 'react';
 
 const Navigation = () => {
@@ -16,7 +16,7 @@ const Navigation = () => {
       <div className="container mx-auto px-4">
         <div className="flex h-16 items-center justify-between">
           <Link to={user ? "/dashboard" : "/"} className="flex items-center gap-2 text-xl font-bold text-primary">
-            <CheckSquare className="h-6 w-6" />
+            <ListTodo className="h-6 w-6" />
             TaskFlow
           </Link>
 
@@ -29,7 +29,7 @@ const Navigation = () => {
                     variant={isActive('/dashboard') ? 'default' : 'ghost'}
                     className="gap-2"
                   >
-                    <CheckSquare className="h-4 w-4" />
+                    <ListTodo className="h-4 w-4" />
                     Dashboard
                   </Button>
                 </Link>
@@ -75,7 +75,7 @@ const Navigation = () => {
                     variant={isActive('/dashboard') ? 'default' : 'ghost'}
                     className="w-full justify-start gap-2"
                   >
-                    <CheckSquare className="h-4 w-4" />
+                    <ListTodo className="h-4 w-4" />
                     Dashboard
                   </Button>
                 </Link>

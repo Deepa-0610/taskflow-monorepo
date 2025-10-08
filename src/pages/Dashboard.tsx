@@ -109,27 +109,35 @@ const Dashboard = () => {
   };
 
   return (
-    <div className="min-h-screen bg-background">
+    <div className="min-h-screen bg-gradient-to-br from-background via-secondary/10 to-background">
       <Navigation />
-      <div className="container mx-auto px-4 py-8">
-        <div className="max-w-4xl mx-auto space-y-8">
-          <div>
-            <h1 className="text-4xl font-bold mb-2">My Tasks</h1>
-            <p className="text-muted-foreground">Manage your daily tasks efficiently</p>
+      <div className="container mx-auto px-4 py-12">
+        <div className="max-w-3xl mx-auto space-y-8">
+          <div className="space-y-3 animate-fade-in">
+            <h1 className="text-5xl font-bold tracking-tight">
+              My <span className="gradient-text">Tasks</span>
+            </h1>
+            <p className="text-lg text-muted-foreground">
+              Organize your day and accomplish your goals
+            </p>
           </div>
 
-          <TaskForm onAddTask={handleAddTask} />
+          <div className="animate-slide-up" style={{ animationDelay: '0.1s' }}>
+            <TaskForm onAddTask={handleAddTask} />
+          </div>
 
           {loading ? (
             <div className="text-center py-12">
               <p className="text-muted-foreground">Loading tasks...</p>
             </div>
           ) : (
-            <TaskList
-              tasks={tasks}
-              onToggleTask={handleToggleTask}
-              onDeleteTask={handleDeleteTask}
-            />
+            <div className="animate-slide-up" style={{ animationDelay: '0.2s' }}>
+              <TaskList
+                tasks={tasks}
+                onToggleTask={handleToggleTask}
+                onDeleteTask={handleDeleteTask}
+              />
+            </div>
           )}
         </div>
       </div>

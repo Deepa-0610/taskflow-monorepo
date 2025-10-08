@@ -27,19 +27,19 @@ const TaskCard = ({ task, onToggle, onDelete }: TaskCardProps) => {
   };
 
   return (
-    <Card className="transition-all hover:shadow-md">
-      <CardContent className="flex items-center gap-4 p-4">
+    <Card className="group animate-fade-in hover-lift">
+      <CardContent className="flex items-center gap-4 p-5">
         <Checkbox
           checked={task.is_complete}
           onCheckedChange={handleToggle}
           disabled={loading}
-          className="h-5 w-5"
+          className="h-5 w-5 transition-transform group-hover:scale-110"
         />
         <span
-          className={`flex-1 ${
+          className={`flex-1 text-base transition-all duration-300 ${
             task.is_complete
-              ? 'text-muted-foreground line-through'
-              : 'text-foreground'
+              ? 'text-muted-foreground line-through opacity-60'
+              : 'text-foreground font-medium'
           }`}
         >
           {task.title}
@@ -49,7 +49,7 @@ const TaskCard = ({ task, onToggle, onDelete }: TaskCardProps) => {
           size="icon"
           onClick={handleDelete}
           disabled={loading}
-          className="text-destructive hover:text-destructive hover:bg-destructive/10"
+          className="text-destructive hover:text-destructive hover:bg-destructive/10 transition-all hover:scale-110 active:scale-95"
         >
           <Trash2 className="h-4 w-4" />
         </Button>
