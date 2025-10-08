@@ -27,19 +27,24 @@ const TaskCard = ({ task, onToggle, onDelete }: TaskCardProps) => {
   };
 
   return (
-    <Card className="group animate-fade-in hover-lift">
+    <Card className="group animate-slide-in-bottom hover-lift border-l-4 border-l-primary/50 hover:border-l-primary transition-all duration-300">
       <CardContent className="flex items-center gap-4 p-5">
-        <Checkbox
-          checked={task.is_complete}
-          onCheckedChange={handleToggle}
-          disabled={loading}
-          className="h-5 w-5 transition-transform group-hover:scale-110"
-        />
+        <div className="relative">
+          <Checkbox
+            checked={task.is_complete}
+            onCheckedChange={handleToggle}
+            disabled={loading}
+            className="h-6 w-6 transition-all duration-300 group-hover:scale-110 data-[state=checked]:bg-gradient-to-br data-[state=checked]:from-accent data-[state=checked]:to-primary data-[state=checked]:border-0"
+          />
+          {task.is_complete && (
+            <div className="absolute inset-0 rounded-sm bg-gradient-to-br from-accent to-primary opacity-20 blur-md animate-pulse-glow" />
+          )}
+        </div>
         <span
           className={`flex-1 text-base transition-all duration-300 ${
             task.is_complete
               ? 'text-muted-foreground line-through opacity-60'
-              : 'text-foreground font-medium'
+              : 'text-foreground font-medium bg-gradient-to-r from-foreground to-primary bg-clip-text'
           }`}
         >
           {task.title}
@@ -49,9 +54,9 @@ const TaskCard = ({ task, onToggle, onDelete }: TaskCardProps) => {
           size="icon"
           onClick={handleDelete}
           disabled={loading}
-          className="text-destructive hover:text-destructive hover:bg-destructive/10 transition-all hover:scale-110 active:scale-95"
+          className="text-destructive hover:text-destructive hover:bg-destructive/10 transition-all duration-300 hover:scale-110 active:scale-95 hover:rotate-12"
         >
-          <Trash2 className="h-4 w-4" />
+          <Trash2 className="h-5 w-5" />
         </Button>
       </CardContent>
     </Card>

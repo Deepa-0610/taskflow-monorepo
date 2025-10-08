@@ -38,21 +38,34 @@ const Dashboard = () => {
   };
 
   useEffect(() => {
+    if (!user) return;
+    
     fetchTasks();
 
-    // Subscribe to realtime changes
+    // Subscribe to realtime changes with proper configuration
     const channel = supabase
       .channel('tasks-changes')
       .on(
         'postgres_changes',
         {
-          event: '*',
+          event: '*', // Listen to all events (INSERT, UPDATE, DELETE)
           schema: 'public',
           table: 'tasks',
-          filter: `user_id=eq.${user?.id}`
+          filter: `user_id=eq.${user.id}`
         },
-        () => {
-          fetchTasks();
+        (payload) => {
+          console.log('Realtime update:', payload);
+          
+          // Immediately update local state based on event type
+          if (payload.eventType === 'INSERT') {
+            setTasks(prev => [payload.new as Task, ...prev]);
+          } else if (payload.eventType === 'UPDATE') {
+            setTasks(prev => prev.map(task => 
+              task.id === payload.new.id ? payload.new as Task : task
+            ));
+          } else if (payload.eventType === 'DELETE') {
+            setTasks(prev => prev.filter(task => task.id !== payload.old.id));
+          }
         }
       )
       .subscribe();
@@ -60,7 +73,7 @@ const Dashboard = () => {
     return () => {
       supabase.removeChannel(channel);
     };
-  }, [user?.id]);
+  }, [user]);
 
   const handleAddTask = async (title: string) => {
     if (!user) return;

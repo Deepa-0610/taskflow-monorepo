@@ -38,25 +38,27 @@ const TaskForm = ({ onAddTask }: TaskFormProps) => {
   };
 
   return (
-    <Card className="shadow-[0_4px_20px_-4px_hsl(var(--primary)/0.15)] border-2">
+    <Card className="shadow-[0_8px_30px_-4px_hsl(262_83%_58%/0.2)] border-2 border-primary/20 hover:border-primary/40 transition-all duration-300 bg-gradient-to-br from-card via-card to-primary/5">
       <CardContent className="pt-6">
         <form onSubmit={handleSubmit} className="flex gap-3">
-          <Input
-            type="text"
-            placeholder="What needs to be done?"
-            value={title}
-            onChange={(e) => setTitle(e.target.value)}
-            disabled={loading}
-            className="flex-1 h-12 text-base transition-all focus:shadow-[0_0_0_3px_hsl(var(--primary)/0.1)]"
-          />
+          <div className="relative flex-1">
+            <Input
+              type="text"
+              placeholder="✨ What needs to be done?"
+              value={title}
+              onChange={(e) => setTitle(e.target.value)}
+              disabled={loading}
+              className="h-12 text-base transition-all duration-300 focus:shadow-[0_0_0_3px_hsl(262_83%_58%/0.2)] focus:border-primary pr-4 bg-background/50"
+            />
+          </div>
           <Button 
             type="submit" 
             disabled={loading || !title.trim()} 
-            className="gap-2 h-12 px-6"
+            className="gap-2 h-12 px-6 relative overflow-hidden"
             variant="gradient"
           >
-            <Plus className="h-5 w-5" />
-            Add Task
+            <Plus className="h-5 w-5 transition-transform group-hover:rotate-180 duration-300" />
+            <span className="relative z-10">Add Task</span>
           </Button>
         </form>
       </CardContent>
