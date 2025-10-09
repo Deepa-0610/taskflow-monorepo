@@ -78,20 +78,46 @@ const Dashboard = () => {
   const handleAddTask = async (title: string) => {
     if (!user) return;
 
+    // Optimistic: add a temp task immediately
+    const tempId = `temp-${crypto.randomUUID()}`;
+    const tempTask: Task = {
+      id: tempId,
+      title,
+      is_complete: false,
+      created_at: new Date().toISOString(),
+      updated_at: new Date().toISOString(),
+      user_id: user.id,
+    };
+    setTasks((prev) => [tempTask, ...prev]);
+
     try {
-      const { error } = await supabase
+      const { data, error } = await supabase
         .from('tasks')
-        .insert([{ title, user_id: user.id }]);
+        .insert([{ title, user_id: user.id }])
+        .select()
+        .single();
 
       if (error) throw error;
+
+      // Replace temp with actual DB row (in case Realtime is delayed)
+      if (data) {
+        setTasks((prev) => prev.map((t) => (t.id === tempId ? (data as Task) : t)));
+      }
+
       toast.success('Task added successfully');
     } catch (error: any) {
+      // Revert optimistic add on error
+      setTasks((prev) => prev.filter((t) => t.id !== tempId));
       toast.error('Failed to add task');
       console.error('Error adding task:', error);
     }
   };
 
   const handleToggleTask = async (id: string, is_complete: boolean) => {
+    const prevTasks = tasks;
+    // Optimistic toggle
+    setTasks((cur) => cur.map((t) => (t.id === id ? { ...t, is_complete } : t)));
+
     try {
       const { error } = await supabase
         .from('tasks')
@@ -101,27 +127,42 @@ const Dashboard = () => {
       if (error) throw error;
       toast.success(is_complete ? 'Task completed!' : 'Task marked incomplete');
     } catch (error: any) {
+      // Revert on error
+      setTasks(prevTasks);
       toast.error('Failed to update task');
       console.error('Error updating task:', error);
     }
   };
 
   const handleEditTask = async (id: string, title: string) => {
+    const newTitle = title.trim();
+    if (!newTitle) return;
+
+    const prevTasks = tasks;
+    // Optimistic title update
+    setTasks((cur) => cur.map((t) => (t.id === id ? { ...t, title: newTitle } : t)));
+
     try {
       const { error } = await supabase
         .from('tasks')
-        .update({ title })
+        .update({ title: newTitle })
         .eq('id', id);
 
       if (error) throw error;
       toast.success('Task updated successfully');
     } catch (error: any) {
+      // Revert on error
+      setTasks(prevTasks);
       toast.error('Failed to update task');
       console.error('Error updating task:', error);
     }
   };
 
   const handleDeleteTask = async (id: string) => {
+    const prevTasks = tasks;
+    // Optimistic remove
+    setTasks((cur) => cur.filter((t) => t.id !== id));
+
     try {
       const { error } = await supabase
         .from('tasks')
@@ -131,6 +172,8 @@ const Dashboard = () => {
       if (error) throw error;
       toast.success('Task deleted');
     } catch (error: any) {
+      // Revert on error
+      setTasks(prevTasks);
       toast.error('Failed to delete task');
       console.error('Error deleting task:', error);
     }
