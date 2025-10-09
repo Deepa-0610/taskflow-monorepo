@@ -4,10 +4,11 @@ import TaskCard from './TaskCard';
 interface TaskListProps {
   tasks: Task[];
   onToggleTask: (id: string, is_complete: boolean) => Promise<void>;
+  onEditTask: (id: string, title: string) => Promise<void>;
   onDeleteTask: (id: string) => Promise<void>;
 }
 
-const TaskList = ({ tasks, onToggleTask, onDeleteTask }: TaskListProps) => {
+const TaskList = ({ tasks, onToggleTask, onEditTask, onDeleteTask }: TaskListProps) => {
   if (tasks.length === 0) {
     return (
       <div className="text-center py-12 bg-card rounded-lg border">
@@ -23,6 +24,7 @@ const TaskList = ({ tasks, onToggleTask, onDeleteTask }: TaskListProps) => {
           key={task.id}
           task={task}
           onToggle={onToggleTask}
+          onEdit={onEditTask}
           onDelete={onDeleteTask}
         />
       ))}

@@ -106,6 +106,21 @@ const Dashboard = () => {
     }
   };
 
+  const handleEditTask = async (id: string, title: string) => {
+    try {
+      const { error } = await supabase
+        .from('tasks')
+        .update({ title })
+        .eq('id', id);
+
+      if (error) throw error;
+      toast.success('Task updated successfully');
+    } catch (error: any) {
+      toast.error('Failed to update task');
+      console.error('Error updating task:', error);
+    }
+  };
+
   const handleDeleteTask = async (id: string) => {
     try {
       const { error } = await supabase
@@ -148,6 +163,7 @@ const Dashboard = () => {
               <TaskList
                 tasks={tasks}
                 onToggleTask={handleToggleTask}
+                onEditTask={handleEditTask}
                 onDeleteTask={handleDeleteTask}
               />
             </div>
