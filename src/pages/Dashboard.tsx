@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
 import Navigation from '@/components/Navigation';
@@ -19,28 +19,85 @@ const Dashboard = () => {
   const { user } = useAuth();
   const [tasks, setTasks] = useState<Task[]>([]);
   const [loading, setLoading] = useState(true);
+  const [filter, setFilter] = useState<'all' | 'active' | 'completed'>('all');
 
-  const fetchTasks = async () => {
+  const getStorageKey = (userId: string) => `taskflow:tasks:${userId}`;
+
+  const loadCachedTasks = (userId: string): Task[] | null => {
+    if (typeof window === 'undefined') return null;
+
+    const cachedTasks = localStorage.getItem(getStorageKey(userId));
+    if (!cachedTasks) return null;
+
+    try {
+      return JSON.parse(cachedTasks) as Task[];
+    } catch (error) {
+      console.error('Failed to parse cached tasks from localStorage:', error);
+      localStorage.removeItem(getStorageKey(userId));
+      return null;
+    }
+  };
+
+  const persistTasks = useCallback((currentUserId: string, tasksToCache: Task[]) => {
+    if (typeof window === 'undefined') return;
+
+    try {
+      localStorage.setItem(getStorageKey(currentUserId), JSON.stringify(tasksToCache));
+    } catch (error) {
+      console.error('Failed to store tasks in localStorage:', error);
+    }
+  }, []);
+
+  const fetchTasks = useCallback(async (currentUserId: string) => {
     try {
       const { data, error } = await supabase
         .from('tasks')
         .select('*')
+        .eq('user_id', currentUserId)
         .order('created_at', { ascending: false });
 
       if (error) throw error;
-      setTasks(data || []);
+
+      const fetchedTasks = data || [];
+      setTasks(fetchedTasks);
+      persistTasks(currentUserId, fetchedTasks);
     } catch (error: any) {
       toast.error('Failed to fetch tasks');
       console.error('Error fetching tasks:', error);
     } finally {
       setLoading(false);
     }
-  };
+  }, [persistTasks]);
+
+  const applyTasksUpdate = useCallback(
+    (updater: (prev: Task[]) => Task[] | Task[]) => {
+      if (!user) return;
+
+      setTasks((prev) => {
+        const next = updater(prev);
+        persistTasks(user.id, next);
+        return next;
+      });
+    },
+    [persistTasks, user]
+  );
 
   useEffect(() => {
-    if (!user) return;
-    
-    fetchTasks();
+    if (!user) {
+      setTasks([]);
+      setLoading(false);
+      return;
+    }
+
+    const cachedTasks = loadCachedTasks(user.id);
+    if (cachedTasks) {
+      setTasks(cachedTasks);
+      setLoading(false);
+    } else {
+      setLoading(true);
+    }
+
+    fetchTasks(user.id);
 
     // Subscribe to realtime changes with proper configuration
     const channel = supabase
@@ -58,13 +115,13 @@ const Dashboard = () => {
           
           // Immediately update local state based on event type
           if (payload.eventType === 'INSERT') {
-            setTasks(prev => [payload.new as Task, ...prev]);
+            applyTasksUpdate(prev => [payload.new as Task, ...prev]);
           } else if (payload.eventType === 'UPDATE') {
-            setTasks(prev => prev.map(task => 
+            applyTasksUpdate(prev => prev.map(task => 
               task.id === payload.new.id ? payload.new as Task : task
             ));
           } else if (payload.eventType === 'DELETE') {
-            setTasks(prev => prev.filter(task => task.id !== payload.old.id));
+            applyTasksUpdate(prev => prev.filter(task => task.id !== payload.old.id));
           }
         }
       )
@@ -73,7 +130,7 @@ const Dashboard = () => {
     return () => {
       supabase.removeChannel(channel);
     };
-  }, [user]);
+  }, [user, fetchTasks]);
 
   const handleAddTask = async (title: string) => {
     if (!user) return;
@@ -88,7 +145,7 @@ const Dashboard = () => {
       updated_at: new Date().toISOString(),
       user_id: user.id,
     };
-    setTasks((prev) => [tempTask, ...prev]);
+    applyTasksUpdate((prev) => [tempTask, ...prev]);
 
     try {
       const { data, error } = await supabase
@@ -101,34 +158,47 @@ const Dashboard = () => {
 
       // Replace temp with actual DB row (in case Realtime is delayed)
       if (data) {
-        setTasks((prev) => prev.map((t) => (t.id === tempId ? (data as Task) : t)));
+        applyTasksUpdate((prev) => prev.map((t) => (t.id === tempId ? (data as Task) : t)));
       }
 
       toast.success('Task added successfully');
     } catch (error: any) {
       // Revert optimistic add on error
-      setTasks((prev) => prev.filter((t) => t.id !== tempId));
+      applyTasksUpdate((prev) => prev.filter((t) => t.id !== tempId));
       toast.error('Failed to add task');
       console.error('Error adding task:', error);
     }
   };
 
   const handleToggleTask = async (id: string, is_complete: boolean) => {
+    if (!user) {
+      toast.error('You must be signed in to update tasks');
+      return;
+    }
+
     const prevTasks = tasks;
     // Optimistic toggle
-    setTasks((cur) => cur.map((t) => (t.id === id ? { ...t, is_complete } : t)));
+    applyTasksUpdate((cur) => cur.map((t) => (t.id === id ? { ...t, is_complete } : t)));
 
     try {
-      const { error } = await supabase
+      const { data, error } = await supabase
         .from('tasks')
         .update({ is_complete })
-        .eq('id', id);
+        .eq('id', id)
+        .eq('user_id', user.id)
+        .select('*')
+        .single();
 
       if (error) throw error;
+
+      if (data) {
+        applyTasksUpdate((cur) => cur.map((t) => (t.id === id ? (data as Task) : t)));
+      }
+
       toast.success(is_complete ? 'Task completed!' : 'Task marked incomplete');
     } catch (error: any) {
       // Revert on error
-      setTasks(prevTasks);
+      applyTasksUpdate(() => prevTasks);
       toast.error('Failed to update task');
       console.error('Error updating task:', error);
     }
@@ -138,42 +208,61 @@ const Dashboard = () => {
     const newTitle = title.trim();
     if (!newTitle) return;
 
+    if (!user) {
+      toast.error('You must be signed in to update tasks');
+      return;
+    }
+
     const prevTasks = tasks;
     // Optimistic title update
-    setTasks((cur) => cur.map((t) => (t.id === id ? { ...t, title: newTitle } : t)));
+    applyTasksUpdate((cur) => cur.map((t) => (t.id === id ? { ...t, title: newTitle } : t)));
 
     try {
-      const { error } = await supabase
+      const { data, error } = await supabase
         .from('tasks')
         .update({ title: newTitle })
-        .eq('id', id);
+        .eq('id', id)
+        .eq('user_id', user.id)
+        .select('*')
+        .single();
 
       if (error) throw error;
+
+      if (data) {
+        applyTasksUpdate((cur) => cur.map((t) => (t.id === id ? (data as Task) : t)));
+      }
+
       toast.success('Task updated successfully');
     } catch (error: any) {
       // Revert on error
-      setTasks(prevTasks);
+      applyTasksUpdate(() => prevTasks);
       toast.error('Failed to update task');
       console.error('Error updating task:', error);
     }
   };
 
   const handleDeleteTask = async (id: string) => {
+    if (!user) {
+      toast.error('You must be signed in to delete tasks');
+      return;
+    }
+
     const prevTasks = tasks;
     // Optimistic remove
-    setTasks((cur) => cur.filter((t) => t.id !== id));
+    applyTasksUpdate((cur) => cur.filter((t) => t.id !== id));
 
     try {
       const { error } = await supabase
         .from('tasks')
         .delete()
-        .eq('id', id);
+        .eq('id', id)
+        .eq('user_id', user.id);
 
       if (error) throw error;
       toast.success('Task deleted');
     } catch (error: any) {
       // Revert on error
-      setTasks(prevTasks);
+      applyTasksUpdate(() => prevTasks);
       toast.error('Failed to delete task');
       console.error('Error deleting task:', error);
     }
@@ -197,6 +286,42 @@ const Dashboard = () => {
             <TaskForm onAddTask={handleAddTask} />
           </div>
 
+          <div className="flex gap-3 pt-2 animate-slide-up" style={{ animationDelay: '0.15s' }}>
+            <button
+              type="button"
+              onClick={() => setFilter('all')}
+              className={`rounded-full border px-5 py-2 text-sm font-medium transition-all hover:-translate-y-0.5 ${
+                filter === 'all'
+                  ? 'border-primary bg-primary text-primary-foreground shadow-lg'
+                  : 'border-muted bg-card text-muted-foreground hover:border-primary/40 hover:text-foreground'
+              }`}
+            >
+              All
+            </button>
+            <button
+              type="button"
+              onClick={() => setFilter('active')}
+              className={`rounded-full border px-5 py-2 text-sm font-medium transition-all hover:-translate-y-0.5 ${
+                filter === 'active'
+                  ? 'border-accent bg-accent text-accent-foreground shadow-lg'
+                  : 'border-muted bg-card text-muted-foreground hover:border-accent/40 hover:text-foreground'
+              }`}
+            >
+              Active
+            </button>
+            <button
+              type="button"
+              onClick={() => setFilter('completed')}
+              className={`rounded-full border px-5 py-2 text-sm font-medium transition-all hover:-translate-y-0.5 ${
+                filter === 'completed'
+                  ? 'border-emerald-500 bg-emerald-500 text-emerald-50 shadow-lg'
+                  : 'border-muted bg-card text-muted-foreground hover:border-emerald-300/60 hover:text-foreground'
+              }`}
+            >
+              Completed
+            </button>
+          </div>
+
           {loading ? (
             <div className="text-center py-12">
               <p className="text-muted-foreground">Loading tasks...</p>
@@ -208,6 +333,7 @@ const Dashboard = () => {
                 onToggleTask={handleToggleTask}
                 onEditTask={handleEditTask}
                 onDeleteTask={handleDeleteTask}
+                filter={filter}
               />
             </div>
           )}

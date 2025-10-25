@@ -1,0 +1,25 @@
+{
+  "name": "@taskflow/api",
+  "version": "0.1.0",
+  "private": true,
+  "description": "API utilities and backend logic for Taskflow",
+  "main": "./src/index.ts",
+  "types": "./src/index.ts",
+  "files": [
+    "src"
+  ],
+  "scripts": {
+    "build": "echo 'API package (library only)'",
+    "dev": "echo 'API package (library only)'",
+    "type-check": "echo 'API package (library only)'"
+  },
+  "dependencies": {
+    "@supabase/supabase-js": "^2.58.0",
+    "@taskflow/shared": "workspace:*",
+    "zod": "^3.25.76"
+  },
+  "devDependencies": {
+    "@types/node": "^22.16.5",
+    "typescript": "^5.8.3"
+  }
+}

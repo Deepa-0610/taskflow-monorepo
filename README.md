@@ -1,73 +1,157 @@
-# Welcome to your Lovable project
+# 🚀 Taskflow - Monorepo
 
-## Project info
+A modern, **production-ready** task management application built with **Next.js**, **TypeScript**, **Tailwind CSS**, and **Supabase**, structured as a monorepo using **pnpm workspaces**.
 
-**URL**: https://lovable.dev/projects/0ae222cf-f773-4876-868d-0d5928f1c12c
+## ✅ Project Status: FULLY COMPLETE
 
-## How can I edit this code?
+All core features are fully implemented and tested:
+- ✨ Full CRUD operations with real-time sync
+- 🔐 Complete authentication flow (sign-up, sign-in, sign-out)
+- 📱 Responsive design for all devices
+- 🎨 Modern UI with 50+ pre-installed Shadcn/ui components
+- 🔄 Real-time database synchronization
+- 🛡️ Protected routes and authorization
 
-There are several ways of editing your application.
+## 🎯 Implemented Features
 
-**Use Lovable**
+### Task Management
+- ✅ Create new tasks with validation
+- ✅ Read/display tasks filtered by user
+- ✅ Update tasks (toggle completion, edit titles)
+- ✅ Delete tasks with confirmation
+- ✅ Real-time synchronization across devices
 
-Simply visit the [Lovable Project](https://lovable.dev/projects/0ae222cf-f773-4876-868d-0d5928f1c12c) and start prompting.
+### Authentication
+- ✅ Email/password sign-up with validation
+- ✅ Email/password sign-in
+- ✅ Session persistence
+- ✅ Sign-out functionality
+- ✅ Protected routes with automatic redirects
 
-Changes made via Lovable will be committed automatically to this repo.
+### Pages & Components
+- ✅ **Home Page**: Landing page with feature highlights and CTAs
+- ✅ **Auth Page**: Sign-up/sign-in with form validation
+- ✅ **Dashboard**: Task management interface with real-time updates
+- ✅ **Profile**: User information and account settings
+- ✅ Navigation with auth state awareness
+- ✅ Task cards with edit/delete/toggle actions
+- ✅ Task form with inline validation
 
-**Use your preferred IDE**
+### User Experience
+- ✅ Smooth fade-in and slide-up animations
+- ✅ Toast notifications for all actions
+- ✅ Loading states and error handling
+- ✅ Mobile-first responsive design
+- ✅ Modern gradient backgrounds
 
-If you want to work locally using your own IDE, you can clone this repo and push changes. Pushed changes will also be reflected in Lovable.
+## Project Structure
 
-The only requirement is having Node.js & npm installed - [install with nvm](https://github.com/nvm-sh/nvm#installing-and-updating)
-
-Follow these steps:
-
-```sh
-# Step 1: Clone the repository using the project's Git URL.
-git clone <YOUR_GIT_URL>
-
-# Step 2: Navigate to the project directory.
-cd <YOUR_PROJECT_NAME>
-
-# Step 3: Install the necessary dependencies.
-npm i
-
-# Step 4: Start the development server with auto-reloading and an instant preview.
-npm run dev
+```
+taskflow-monorepo/
+├── packages/
+│   ├── web/           # Next.js web application
+│   ├── api/           # API utilities and backend logic
+│   └── shared/        # Shared types, utilities, and components
+├── pnpm-workspace.yaml
+├── tsconfig.base.json
+└── package.json
 ```
 
-**Edit a file directly in GitHub**
+### Packages
 
-- Navigate to the desired file(s).
-- Click the "Edit" button (pencil icon) at the top right of the file view.
-- Make your changes and commit the changes.
-
-**Use GitHub Codespaces**
-
-- Navigate to the main page of your repository.
-- Click on the "Code" button (green button) near the top right.
-- Select the "Codespaces" tab.
-- Click on "New codespace" to launch a new Codespace environment.
-- Edit files directly within the Codespace and commit and push your changes once you're done.
-
-## What technologies are used for this project?
-
-This project is built with:
-
-- Vite
+#### `@taskflow/web`
+The main Next.js web application featuring:
+- Next.js 14 with App Router
+- React 18
 - TypeScript
-- React
-- shadcn-ui
 - Tailwind CSS
+- Shadcn/ui components
+- Supabase authentication
 
-## How can I deploy this project?
+#### `@taskflow/api`
+Reusable API utilities including:
+- Supabase client configuration
+- API services and functions
+- Database utilities
 
-Simply open [Lovable](https://lovable.dev/projects/0ae222cf-f773-4876-868d-0d5928f1c12c) and click on Share -> Publish.
+#### `@taskflow/shared`
+Shared code across packages:
+- TypeScript types and interfaces
+- Utility functions
+- Common constants
 
-## Can I connect a custom domain to my Lovable project?
+## Getting Started
 
-Yes, you can!
+### Prerequisites
+- Node.js 18+ 
+- pnpm 8+
 
-To connect a domain, navigate to Project > Settings > Domains and click Connect Domain.
+### Installation
 
-Read more here: [Setting up a custom domain](https://docs.lovable.dev/features/custom-domain#custom-domain)
+```bash
+# Install pnpm if you don't have it
+npm install -g pnpm
+
+# Install dependencies for all workspaces
+pnpm install
+```
+
+### Development
+
+```bash
+# Start development server (runs all dev scripts in parallel)
+pnpm dev
+
+# Run development for a specific package
+pnpm --filter @taskflow/web dev
+```
+
+### Build
+
+```bash
+# Build all packages
+pnpm build
+
+# Build a specific package
+pnpm --filter @taskflow/web build
+```
+
+### Production
+
+```bash
+# Start production server
+pnpm start
+
+# Build and start
+pnpm build && pnpm start
+```
+
+## Environment Variables
+
+Create a `.env.local` file in `packages/web/`:
+
+```env
+NEXT_PUBLIC_SUPABASE_URL=your_supabase_url
+NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY=your_publishable_key
+NEXT_PUBLIC_SUPABASE_PROJECT_ID=your_project_id
+```
+
+## Technologies
+
+- **Frontend**: Next.js 14, React 18, TypeScript
+- **Styling**: Tailwind CSS, Shadcn/ui
+- **Backend**: Supabase
+- **Package Manager**: pnpm
+- **Monorepo**: pnpm workspaces
+
+## Scripts
+
+- `pnpm dev` - Start development servers for all packages
+- `pnpm build` - Build all packages
+- `pnpm start` - Start production server
+- `pnpm lint` - Run linters for all packages
+- `pnpm type-check` - Run TypeScript type checking
+
+## License
+
+MIT

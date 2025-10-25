@@ -1,0 +1,9 @@
+{
+  "$schema": "https://ui.shadcn.com/schema.json",
+  "style": "default",
+  "rsc": true,
+  "registry": "shadcn-ui",
+  "resolvedPath": "@/components/ui",
+  "componentsPath": "src/components/ui",
+  "utilsPath": "src/lib/utils"
+}
