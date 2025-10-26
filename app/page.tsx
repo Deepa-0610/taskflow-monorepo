@@ -3,7 +3,7 @@
 import { useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { useAuth } from '@/hooks/useAuth';
-import Navigation from '@/components/Navigation';
+import Navigation from '@/components/navigation';
 import { Button } from '@/components/ui/button';
 import { CheckSquare, ListTodo, Zap, Shield, Clock, CheckCircle2 } from 'lucide-react';
 

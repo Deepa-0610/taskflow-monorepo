@@ -1,5 +1,7 @@
 'use client'
 
+export const dynamic = 'force-dynamic'
+
 import { useAuth } from '@/hooks/useAuth'
 import { ProtectedRoute } from '@/components/ProtectedRoute'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
