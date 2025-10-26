@@ -1,42 +1,50 @@
-name: CI Pipeline
+name: Monorepo CI Pipeline
 
 on:
   push:
     branches:
-      - "**"     # run on all branches
+      - main
   pull_request:
-    branches:
-      - main     # run when PR targets main
 
 jobs:
   build-and-check:
+    name: Build & Test Monorepo
     runs-on: ubuntu-latest
 
     steps:
-      # 1️⃣ Check out the code
+      # Step 1: Checkout the repository
       - name: Checkout repository
         uses: actions/checkout@v4
 
-      # 2️⃣ Set up Node.js and pnpm
+      # Step 2: Setup Node.js
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
           node-version: 20
-          cache: "pnpm"
+          cache: 'pnpm'
 
+      # Step 3: Setup pnpm
       - name: Setup pnpm
         uses: pnpm/action-setup@v3
         with:
-          version: 9
+          version: 9  # Match your local pnpm version
 
-      # 3️⃣ Install dependencies from monorepo root
+      # Step 4: Install dependencies for all workspaces
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
 
-      # 4️⃣ Run linting
-      - name: Run lint checks
-        run: pnpm lint
+      # Step 5: Build all apps/packages
+      - name: Build all workspaces
+        run: |
+          echo "🔨 Building all workspaces..."
+          pnpm run build --filter=...
 
-      # 5️⃣ Run type checking via TurboRepo
-      - name: Run type checks
-        run: pnpm turbo type
+      # Step 6: Run tests (optional)
+      - name: Run tests
+        run: |
+          echo "🧪 Running tests across all workspaces..."
+          pnpm run test --filter=...
+
+      # Step 7: Lint (optional)
+      - name: Lint code
+        run: pnpm run lint --filter=...
