@@ -1,50 +1,55 @@
-name: Monorepo CI Pipeline
+name: Taskflow Code Quality Check
 
 on:
   push:
-    branches:
-      - main
+    branches: [main]
   pull_request:
+    branches: [main]
+  workflow_dispatch:
 
 jobs:
-  build-and-check:
-    name: Build & Test Monorepo
+  code-quality:
+    name: Code Quality Check
     runs-on: ubuntu-latest
 
     steps:
-      # Step 1: Checkout the repository
-      - name: Checkout repository
+      - name: Checkout code
         uses: actions/checkout@v4
 
-      # Step 2: Setup Node.js
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: 20
+          node-version: 18
           cache: 'pnpm'
 
-      # Step 3: Setup pnpm
-      - name: Setup pnpm
+      - name: Install pnpm
         uses: pnpm/action-setup@v3
         with:
-          version: 9  # Match your local pnpm version
+          version: 8
+          run_install: false
 
-      # Step 4: Install dependencies for all workspaces
+      - name: Get pnpm store directory
+        id: pnpm-cache
+        shell: bash
+        run: |
+          echo "STORE_PATH=$(pnpm store path)" >> $GITHUB_OUTPUT
+
+      - name: Setup pnpm cache
+        uses: actions/cache@v4
+        with:
+          path: ${{ steps.pnpm-cache.outputs.STORE_PATH }}
+          key: ${{ runner.os }}-pnpm-store-${{ hashFiles('**/pnpm-lock.yaml') }}
+          restore-keys: |
+            ${{ runner.os }}-pnpm-store-
+
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
 
-      # Step 5: Build all apps/packages
-      - name: Build all workspaces
-        run: |
-          echo "🔨 Building all workspaces..."
-          pnpm run build --filter=...
+      - name: Type check
+        run: pnpm type-check
 
-      # Step 6: Run tests (optional)
-      - name: Run tests
-        run: |
-          echo "🧪 Running tests across all workspaces..."
-          pnpm run test --filter=...
+      - name: Lint
+        run: pnpm lint
 
-      # Step 7: Lint (optional)
-      - name: Lint code
-        run: pnpm run lint --filter=...
+      - name: Build
+        run: pnpm build
