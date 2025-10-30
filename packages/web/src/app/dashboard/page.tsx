@@ -19,35 +19,35 @@ interface Task {
 
 type TaskFilter = 'all' | 'active' | 'completed'
 
+const localStorageKey = (userId?: string) => `taskflow_tasks_${userId ?? 'anon'}`
+
+const loadLocalTasks = (userId?: string): Task[] => {
+  try {
+    const raw = localStorage.getItem(localStorageKey(userId))
+    if (!raw) return []
+    const parsed = JSON.parse(raw) as Task[]
+    if (!Array.isArray(parsed)) return []
+    return parsed
+  } catch (err) {
+    console.warn('Failed to load tasks from localStorage', err)
+    return []
+  }
+}
+
+const saveLocalTasks = (items: Task[], userId?: string) => {
+  try {
+    localStorage.setItem(localStorageKey(userId), JSON.stringify(items))
+  } catch (err) {
+    console.warn('Failed to save tasks to localStorage', err)
+  }
+}
+
 export default function DashboardPage() {
   const { user } = useAuth()
   const [tasks, setTasks] = useState<Task[]>([])
   const [loading, setLoading] = useState(true)
   const [refreshKey, setRefreshKey] = useState(0)
   const [filter, setFilter] = useState<TaskFilter>('all')
-
-  const localStorageKey = (userId?: string) => `taskflow_tasks_${userId ?? 'anon'}`
-
-  const loadLocalTasks = (userId?: string) => {
-    try {
-      const raw = localStorage.getItem(localStorageKey(userId))
-      if (!raw) return [] as Task[]
-      const parsed = JSON.parse(raw) as Task[]
-      if (!Array.isArray(parsed)) return [] as Task[]
-      return parsed
-    } catch (err) {
-      console.warn('Failed to load tasks from localStorage', err)
-      return [] as Task[]
-    }
-  }
-
-  const saveLocalTasks = (items: Task[], userId?: string) => {
-    try {
-      localStorage.setItem(localStorageKey(userId), JSON.stringify(items))
-    } catch (err) {
-      console.warn('Failed to save tasks to localStorage', err)
-    }
-  }
 
   const supabase = useMemo(() => {
     if (!user) {
@@ -133,7 +133,7 @@ export default function DashboardPage() {
       const next = [task, ...prev]
       // persist immediately to localStorage
       try {
-        saveLocalTasks(next, user?.id)
+        saveLocalTasks(next, user.id)
       } catch (err) {
         /* ignore */
       }
@@ -142,7 +142,7 @@ export default function DashboardPage() {
     setRefreshKey(prev => prev + 1)
   }, [user])
 
-  // onTaskUpdated can be called with an updated task (optimistic) or without payload.
+  // onTaskUpdated can be called with an updated task (optimistic) or without a payload.
   const handleTaskUpdated = useCallback((updatedTask?: Task) => {
     if (updatedTask && user) {
       setTasks((prev) => {

@@ -1,20 +1,11 @@
-import js from '@eslint/js'
-import nextPlugin from '@next/eslint-plugin-next'
-import tseslint from 'typescript-eslint'
+const nextPlugin = require("@next/eslint-plugin-next");
 
-export default tseslint.config(
+/** @type {import('eslint').Linter.FlatConfig[]} */
+module.exports = [
   {
-    ignores: ['.next/**', 'node_modules/**', 'out/**', '.vercel/**'],
-  },
-  {
-    files: ['**/*.{js,jsx,ts,tsx}'],
-    extends: [js.configs.recommended, ...tseslint.configs.recommended],
     plugins: {
-      '@next/next': nextPlugin,
+      "@next/next": nextPlugin,
     },
-    rules: {
-      ...nextPlugin.configs.recommended.rules,
-      ...nextPlugin.configs['core-web-vitals'].rules,
-    },
+    rules: nextPlugin.configs.recommended.rules,
   },
-)
+];
