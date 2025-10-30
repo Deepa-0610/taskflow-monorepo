@@ -44,7 +44,11 @@ const saveLocalTasks = (items: Task[], userId?: string) => {
 
 export default function DashboardPage() {
   const { user } = useAuth()
-  const [tasks, setTasks] = useState<Task[]>([])
+  // Safely load initial state from localStorage only on the client-side
+  const [tasks, setTasks] = useState<Task[]>(() => {
+    if (typeof window === 'undefined') return []
+    return loadLocalTasks(user?.id)
+  })
   const [loading, setLoading] = useState(true)
   const [refreshKey, setRefreshKey] = useState(0)
   const [filter, setFilter] = useState<TaskFilter>('all')
@@ -96,15 +100,7 @@ export default function DashboardPage() {
   useEffect(() => {
     if (!user || !supabase) return
 
-    // Load any locally cached tasks first so the UI is responsive,
-    // then fetch latest from the server and merge.
-    try {
-      const cached = loadLocalTasks(user.id)
-      if (cached.length > 0) setTasks(cached)
-    } catch (err) {
-      /* ignore */
-    }
-
+    // Fetch latest from the server and merge with existing state.
     fetchTasks()
 
     const channel = supabase
