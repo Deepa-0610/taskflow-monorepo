@@ -44,11 +44,7 @@ const saveLocalTasks = (items: Task[], userId?: string) => {
 
 export default function DashboardPage() {
   const { user } = useAuth()
-  // Safely load initial state from localStorage only on the client-side
-  const [tasks, setTasks] = useState<Task[]>(() => {
-    if (typeof window === 'undefined') return []
-    return loadLocalTasks(user?.id)
-  })
+  const [tasks, setTasks] = useState<Task[]>([])
   const [loading, setLoading] = useState(true)
   const [refreshKey, setRefreshKey] = useState(0)
   const [filter, setFilter] = useState<TaskFilter>('all')
@@ -76,20 +72,12 @@ export default function DashboardPage() {
         .order('updated_at', { ascending: false, nullsFirst: false })
         .order('created_at', { ascending: false })
 
-      if (error) throw error
-      // Merge server tasks with any locally cached tasks (e.g., created offline)
-      const serverTasks: Task[] = data || []
-      const localTasks = loadLocalTasks(user.id)
-
-      // Build a map of server tasks to avoid duplicates
-      const idSet = new Set(serverTasks.map((t) => t.id))
-      const merged = [...serverTasks]
-      for (const lt of localTasks) {
-        if (!idSet.has(lt.id)) merged.push(lt)
+      if (error) {
+        throw error
       }
-
-      setTasks(merged)
-      saveLocalTasks(merged, user.id)
+      // Set tasks directly from the server response.
+      // The initial state is already hydrated from localStorage on the client.
+      setTasks(data || [])
     } catch (error) {
       console.error('Error fetching tasks:', error)
     } finally {
@@ -100,7 +88,15 @@ export default function DashboardPage() {
   useEffect(() => {
     if (!user || !supabase) return
 
-    // Fetch latest from the server and merge with existing state.
+    // On user load, hydrate initial state from localStorage and then fetch from server.
+    try {
+      const cached = loadLocalTasks(user.id)
+      if (cached.length > 0) {
+        setTasks(cached)
+      }
+    } catch (err) {
+      /* ignore */
+    }
     fetchTasks()
 
     const channel = supabase
@@ -122,7 +118,7 @@ export default function DashboardPage() {
     return () => {
       supabase.removeChannel(channel)
     }
-  }, [user, supabase, fetchTasks])
+  }, [user, supabase])
 
   const handleTaskAdded = useCallback((task: Task) => {
     setTasks((prev) => {
