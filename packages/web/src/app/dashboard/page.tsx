@@ -118,7 +118,7 @@ export default function DashboardPage() {
     return () => {
       supabase.removeChannel(channel)
     }
-  }, [user, supabase])
+  }, [user, supabase, fetchTasks])
 
   const handleTaskAdded = useCallback((task: Task) => {
     setTasks((prev) => {
