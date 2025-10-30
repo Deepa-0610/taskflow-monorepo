@@ -1,7 +1,5 @@
 'use client'
 
-export const dynamic = 'force-dynamic'
-
 import { useCallback, useEffect, useMemo, useState } from 'react'
 import { createBrowserClient } from '@supabase/ssr'
 
@@ -49,16 +47,13 @@ export default function DashboardPage() {
   const [refreshKey, setRefreshKey] = useState(0)
   const [filter, setFilter] = useState<TaskFilter>('all')
 
-  const supabase = useMemo(() => {
-    if (!user) {
-      return null
-    }
-
-    return createBrowserClient(
+  // Safely initialize the Supabase client only on the client-side
+  const [supabase] = useState(() =>
+    createBrowserClient(
       process.env.NEXT_PUBLIC_SUPABASE_URL || '',
       process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY || ''
     )
-  }, [user])
+  )
 
   const fetchTasks = useCallback(async () => {
     if (!user || !supabase) return
